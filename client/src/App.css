@@ -1,0 +1,106 @@
+/* client/src/App.css */
+:root {
+    font-family: Arial, sans-serif;
+    --primary-color: #4285F4; /* Google Blue */
+    --secondary-color: #f4b400; /* Google Yellow */
+    --background-color: #f8f9fa;
+    --note-bg: #ffffff;
+    --border-color: #dadce0;
+    --padding: 20px;
+}
+
+body {
+    margin: 0;
+    background-color: var(--background-color);
+}
+
+.app-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--padding);
+}
+
+/* Header Styling */
+.app-header {
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: var(--padding);
+}
+
+.app-header h1 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+/* Form Styling */
+.add-note-form {
+    display: flex;
+    flex-direction: column;
+    padding: var(--padding);
+    background-color: var(--note-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--padding);
+}
+
+.add-note-form textarea {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.add-note-form button {
+    padding: 10px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.add-note-form button:hover {
+    background-color: #e3a600;
+}
+
+/* Notes List Styling */
+.notes-list-section h2 {
+    color: #3c4043;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+    margin-top: 30px;
+}
+
+.notes-list {
+    list-style: none;
+    padding: 0;
+}
+
+.note-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: var(--note-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid var(--primary-color);
+}
+
+.note-text {
+    margin: 0;
+    flex-grow: 1;
+    font-size: 1.1em;
+}
+
+.note-date {
+    color: #70757a;
+    font-size: 0.9em;
+    margin-left: 20px;
+    white-space: nowrap;
+}
