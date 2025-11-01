@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './App.css'
 
 // Component for the Note List Item
@@ -38,11 +38,6 @@ const AddNoteForm = ({ onAddNote }) => {
 
 // Main App Component
 function App() {
-    // Hardcoded notes for Day 1. On Day 4, this state will be populated from the server.
-    const [notes, setNotes] = useState([
-        { id: 101, text: "Finish Day 1 Setup!", date: "2025-10-31" },
-        { id: 102, text: "Connect to Firestore tomorrow.", date: "2025-10-31"}
-    ]);
 
     // Placeholder function for Day 4
     const handleAddNote = (text) => {
@@ -51,6 +46,25 @@ function App() {
         const newNote = { id: Date.now(), text: text, date: new Date().toISOString().split('T')[0] };
         setNotes([newNote, ...notes]);
     };
+
+    const [notes, setNotes] = useState([]);
+    const [loading, setLoading] = useState(true); // New loading state
+
+    useEffect(() => {
+        const fetchNotes = async () => {
+            try {
+                // Fetch from your Express API running on port 3001
+                const response = await fetch('http://localhost:3001/notes');
+                const data = await response.json();
+                setNotes(data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching notes:", error);
+                setLoading(false);
+            }
+        };
+        fetchNotes();
+    }, []); // Empty array runs this code only once when the component mounts
 
     return (
         <div className="app-container">
@@ -64,12 +78,16 @@ function App() {
 
                 <section className="notes-list-section">
                     <h2>My Notes</h2>
-                    <ul className="notes-list">
-                        {notes.map((note) => (
-                            <NoteItem key={note.id} note={note} />
-                        ))}
-                    </ul>
-                    {notes.length === 0 && <p className="no-notes">No notes yet. Add one above!</p>}
+                    {loading ? (
+                        <p className="loading-state">Loading notes...</p>
+                    ) : (
+                        <ul className="notes-list">
+                            {notes.map((note) => (
+                                <NoteItem key={note.id} note={note} />
+                            ))}
+                        </ul>
+                    )}
+                    {!loading && notes.length === 0 && <p className="no-notes">No notes yet. Add one above!</p>}
                 </section>
             </main>
         </div>
