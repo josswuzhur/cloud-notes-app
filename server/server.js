@@ -48,6 +48,39 @@ app.get('/notes', async (req, res) => {
         res.status(500).send('Error fetching notes from database.');
     }
 });
+
+app.post('/notes', async (req, res) => {
+    try {
+        // Extract data from the request body
+        // The client send: { text: "New note content" }
+        const { text } = req.body;
+
+        if (!text) {
+            return res.status(400).send("Note text is required");
+        }
+
+        // Prepare the data object for Firestore
+        const newNote = {
+            text: text,
+            // Add a server-side timestamp for reliability
+            date: new Date().toISOString().split('T')[0],
+        };
+
+        // Save the new document to the 'notes' collection
+        // add() automatically generates a unique ID for the document
+        const docRef = await db.collection('notes').add(newNote);
+
+        // Send back the created note data, including the new Firestore ID
+        res.status(201).json({
+            id: docRef.id,
+            ...newNote
+        });
+    } catch (error) {
+        console.error('Error creating note:', error);
+        res.status(500).send('Error saving note to database.');
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server started on port: ${port}`);
 })

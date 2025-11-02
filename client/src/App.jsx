@@ -32,20 +32,13 @@ const AddNoteForm = ({ onAddNote }) => {
                 rows="3"
                 required
             />
+            <button type='submit' className='submit-button'>Add Note</button>
         </form>
     );
 };
 
 // Main App Component
 function App() {
-
-    // Placeholder function for Day 4
-    const handleAddNote = (text) => {
-        console.log("Note to be added:", text);
-        // For now, just update the local state to see the form working
-        const newNote = { id: Date.now(), text: text, date: new Date().toISOString().split('T')[0] };
-        setNotes([newNote, ...notes]);
-    };
 
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true); // New loading state
@@ -63,8 +56,36 @@ function App() {
                 setLoading(false);
             }
         };
-        fetchNotes();
+
+        // This pattern executes the async function immediately
+        (async () => {
+            await fetchNotes();
+        })();
     }, []); // Empty array runs this code only once when the component mounts
+
+    const handleAddNote = async (text) => {
+        try {
+            const response = await fetch('http://localhost:3001/notes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // Send the note text as a JSON body to the server
+                body: JSON.stringify({ text }),
+            });
+
+            // If the server successfully created the note (status 201)
+            if (response.status === 201) {
+                const newNote = await response.json();
+                // Add the new note (which now includes the Firestore ID) to the top of the list
+                setNotes([newNote, ...notes]);
+            } else {
+                console.error("Failed to add note on server.");
+            }
+        } catch (error) {
+            console.error("Network error adding note:", error);
+        }
+    };
 
     return (
         <div className="app-container">
