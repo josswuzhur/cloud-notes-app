@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-// Note: We rely on App.css being present in the same directory for styling
+import './App.css';
+import AuthComponent from './AuthComponent';
+
+// ******************************************************
+// *** NoteItem Component (Unchanged from Day 5) ***
+// ******************************************************
 
 // Component for the Note List Item (Handles state for editing, requires onDelete and onUpdate props)
 const NoteItem = ({ note, onDelete, onUpdate }) => {
@@ -81,27 +86,38 @@ const AddNoteForm = ({ onAddNote }) => {
     );
 };
 
-// Main App Component
+
+// ******************************************************
+// *** Main App Component (Updated for Auth) ***
+// ******************************************************
+
 function App() {
+    // Current user state (null if logged out, object if logged in)
+    const [user, setUser] = useState(null);
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // ******************************************************
-    // *** R: REAL-TIME READ (SSE CLIENT) Logic - NEW for Day 5 ***
+    // *** R: REAL-TIME READ (SSE CLIENT) Logic ***
     // ******************************************************
     useEffect(() => {
+        // Only attempt to establish the connection if a user is logged in
+        if (!user) {
+            setNotes([]);
+            setLoading(false);
+            return;
+        }
+
+        // NOTE: We will update the server route in Day 7 to secure it by user ID.
+        // For now, the notes are public, but we only load them when a user is present.
         const url = 'http://localhost:3001/notes';
 
         // 1. Establish an SSE connection using EventSource
         const eventSource = new EventSource(url);
 
-        // 2. Define the listener for the 'message' event (the data stream from the server)
         eventSource.onmessage = (event) => {
             try {
-                // The data sent by the server is a JSON string of the entire notes array
                 const newNotes = JSON.parse(event.data);
-
-                // Update the state with the new, complete array of notes
                 setNotes(newNotes);
                 setLoading(false);
             } catch (error) {
@@ -112,33 +128,35 @@ function App() {
         eventSource.onerror = (error) => {
             console.error("SSE connection error:", error);
             setLoading(false);
-            // NOTE: EventSource will attempt to auto-reconnect on most errors
         };
 
         // 3. Define the cleanup function
-        // This closes the persistent connection when the component unmounts
         return () => {
             eventSource.close();
-            console.log('SSE connection closed.');
         };
 
-    }, []); // Runs once when the component mounts
+    }, [user]); // Re-run effect whenever the user state changes (login/logout)
+
 
     // ******************************************************
-    // *** C: CREATE (POST) Logic ***
+    // *** CRUD HANDLERS (Unchanged, rely on SSE to update UI) ***
     // ******************************************************
+
     const handleAddNote = async (text) => {
+        // Check if user is logged in before allowing POST
+        if (!user) {
+            console.error("Authentication required to add a note.");
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:3001/notes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text }),
+                body: JSON.stringify({ text, userId: user.uid }), // Send userId to server
             });
 
             if (response.status === 201) {
-                // Note: We don't need to manually update state here!
-                // The server will handle the POST, and the SSE listener (EventSource)
-                // will automatically fetch the updated notes list and update the UI.
                 console.log("Note added. Waiting for real-time update from server.");
             } else {
                 console.error("Failed to add note on server.");
@@ -148,12 +166,12 @@ function App() {
         }
     };
 
-
-    // ******************************************************
-    // *** D: DELETE Logic ***
-    // ******************************************************
     const handleDeleteNote = async (id) => {
-        // We no longer do optimistic UI update. We wait for the SSE stream to update the UI.
+        if (!user) {
+            console.error("Authentication required to delete a note.");
+            return;
+        }
+
         try {
             const response = await fetch(`http://localhost:3001/notes/${id}`, {
                 method: 'DELETE',
@@ -170,16 +188,17 @@ function App() {
         }
     };
 
-
-    // ******************************************************
-    // *** U: UPDATE (PUT) Logic ***
-    // ******************************************************
     const handleUpdateNote = async (id, newText) => {
+        if (!user) {
+            console.error("Authentication required to update a note.");
+            return;
+        }
+
         try {
             const response = await fetch(`http://localhost:3001/notes/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: newText }),
+                body: JSON.stringify({ text: newText, userId: user.uid }), // Send userId to server
             });
 
             if (response.status === 200) {
@@ -197,30 +216,42 @@ function App() {
         <div className="app-container">
             <header className="app-header">
                 <h1>Cloud Notes App</h1>
-                { /* Day 7: We will add login/logout buttons here */ }
+                {/* AuthComponent manages login state and passes the user object back up */}
+                <AuthComponent user={user} setUser={setUser} />
             </header>
 
             <main className="main-content">
-                <AddNoteForm onAddNote={handleAddNote} />
+                {user ? (
+                    <>
+                        <AddNoteForm onAddNote={handleAddNote} />
 
-                <section className="notes-list-section">
-                    <h2>My Notes</h2>
-                    {loading ? (
-                        <p className="loading-state">Loading notes...</p>
-                    ) : (
-                        <ul className="notes-list">
-                            {notes.map((note) => (
-                                <NoteItem
-                                    key={note.id}
-                                    note={note}
-                                    onDelete={handleDeleteNote}
-                                    onUpdate={handleUpdateNote}
-                                />
-                            ))}
-                        </ul>
-                    )}
-                    {!loading && notes.length === 0 && <p className="no-notes">No notes yet. Add one above!</p>}
-                </section>
+                        <section className="notes-list-section">
+                            <h2>My Notes</h2>
+                            {loading ? (
+                                <p className="loading-state">Loading notes...</p>
+                            ) : (
+                                <ul className="notes-list">
+                                    {notes.map((note) => (
+                                        <NoteItem
+                                            key={note.id}
+                                            note={note}
+                                            onDelete={handleDeleteNote}
+                                            onUpdate={handleUpdateNote}
+                                        />
+                                    ))}
+                                </ul>
+                            )}
+                            {!loading && notes.length === 0 && <p className="no-notes">No notes yet. Add one above!</p>}
+                        </section>
+                    </>
+                ) : (
+                    // Display a prompt when logged out
+                    <div className="logged-out-prompt">
+                        <h2>Please Sign In or Register</h2>
+                        <p>You must be signed in to view and manage your private notes.</p>
+                        <p>Use the buttons above to get started!</p>
+                    </div>
+                )}
             </main>
         </div>
     );
