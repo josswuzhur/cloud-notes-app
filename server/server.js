@@ -81,6 +81,45 @@ app.post('/notes', async (req, res) => {
     }
 });
 
+// Rout to delete a note by ID
+app.delete('/notes/:id', async (req, res) => {
+    try {
+        const id = req.params.id; // Get ID from URL parameter
+        const docRef = db.collection('notes').doc(id);
+
+        await docRef.delete();
+
+        // Send a successful but empty response (No Content)
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting note:', error);
+        res.status(500).send('Error deleting note from database.');
+    }
+});
+
+app.put('/notes/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { text } = req.body; // New text from the request body
+
+        if (!text) {
+            return res.status(400).send("New note text is required.");
+        }
+
+        const docRef = db.collection('notes').doc(id);
+
+        // Update the 'text' field in the Firestore document
+        await docRef.update({ text: text });
+
+        // Send back the updated note (with the old ID)
+        res.status(200).json({ id: id, text: text });
+
+    } catch (error) {
+        console.error('Error updating note:', error);
+        res.status(500).send('Error updating note in database.');
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server started on port: ${port}`);
-})
+});

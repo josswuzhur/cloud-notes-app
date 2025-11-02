@@ -1,78 +1,81 @@
-/* client/src/App.css */
-:root {
-    font-family: Arial, sans-serif;
-    --primary-color: #4285F4; /* Google Blue */
-    --secondary-color: #f4b400; /* Google Yellow */
-    --background-color: #f8f9fa;
-    --note-bg: #ffffff;
-    --border-color: #dadce0;
-    --padding: 20px;
-}
-
+/* Base styles for the Notes App */
 body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    background-color: #f4f7f9;
+    color: #333;
     margin: 0;
-    background-color: var(--background-color);
+    padding: 0;
 }
 
 .app-container {
     max-width: 800px;
-    margin: 0 auto;
-    padding: var(--padding);
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* Header Styling */
 .app-header {
     text-align: center;
-    padding: 10px 0;
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: var(--padding);
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eef;
 }
 
 .app-header h1 {
-    color: var(--primary-color);
-    margin: 0;
+    color: #2c3e50;
+    font-size: 2em;
+    font-weight: 700;
 }
 
-/* Form Styling */
+/* --- Add Note Form Styles --- */
 .add-note-form {
     display: flex;
     flex-direction: column;
-    padding: var(--padding);
-    background-color: var(--note-bg);
+    gap: 10px;
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #ecf0f1;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    margin-bottom: var(--padding);
 }
 
 .add-note-form textarea {
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 12px;
+    border: 1px solid #bdc3c7;
+    border-radius: 6px;
     resize: vertical;
+    font-size: 16px;
+    transition: border-color 0.3s;
 }
 
-.add-note-form button {
-    padding: 10px;
-    background-color: var(--secondary-color);
+.add-note-form textarea:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.submit-button {
+    padding: 12px 20px;
+    background-color: #3498db;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-size: 16px;
     cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
-.add-note-form button:hover {
-    background-color: #e3a600;
+.submit-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
 }
 
-/* Notes List Styling */
+/* --- Notes List Styles --- */
 .notes-list-section h2 {
-    color: #3c4043;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 5px;
-    margin-top: 30px;
+    color: #34495e;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
 }
 
 .notes-list {
@@ -81,26 +84,93 @@ body {
 }
 
 .note-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    background-color: var(--note-bg);
+    background-color: #ffffff;
+    padding: 15px 20px;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border-left: 5px solid var(--primary-color);
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
 }
 
 .note-text {
-    margin: 0;
-    flex-grow: 1;
-    font-size: 1.1em;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
-.note-date {
-    color: #70757a;
+.note-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8em;
+    color: #7f8c8d;
+    border-top: 1px dashed #ecf0f1;
+    padding-top: 10px;
+}
+
+/* --- Action Button Styles (New for CRUD) --- */
+.note-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     font-size: 0.9em;
-    margin-left: 20px;
-    white-space: nowrap;
+    font-weight: 600;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.action-button:hover {
+    opacity: 0.9;
+}
+
+.edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+.delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.save {
+    background-color: #27ae60;
+    color: white;
+}
+
+.cancel {
+    background-color: #95a5a6;
+    color: white;
+}
+
+/* --- Editing State Styles (New for CRUD) --- */
+.note-item.editing {
+border: 2px solid #3498db;
+padding: 18px; /* Slightly more padding when editing */
+}
+
+.edit-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+    resize: vertical;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Include padding in element's total width/height */
+}
+
+/* --- Utility/State Styles --- */
+.loading-state, .no-notes {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 20px;
+    border: 1px dashed #bdc3c7;
+    border-radius: 6px;
+    margin-top: 20px;
 }
